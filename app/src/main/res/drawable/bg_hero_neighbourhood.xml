@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="200dp"
+    android:viewportWidth="400"
+    android:viewportHeight="200">
+    <!-- Deep Trust Indigo to Emerald Night Sky Gradient -->
+    <path android:pathData="M0,0h400v200h-400z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="400"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#0F2547" />
+                <item android:offset="0.55" android:color="#1A365D" />
+                <item android:offset="1.0" android:color="#065F46" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Radar & Neighborhood Connection Rings -->
+    <path
+        android:fillColor="#1210B981"
+        android:pathData="M320,90 m-110,0 a110,110 0 1,0 220,0 a110,110 0 1,0 -220,0" />
+    <path
+        android:fillColor="#1F10B981"
+        android:pathData="M320,90 m-75,0 a75,75 0 1,0 150,0 a75,75 0 1,0 -150,0" />
+    <path
+        android:fillColor="#2E10B981"
+        android:pathData="M320,90 m-42,0 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0" />
+    <!-- Urban Skyline Silhouette at Bottom -->
+    <path
+        android:fillColor="#18FFFFFF"
+        android:pathData="M0,200 L0,145 L35,145 L35,125 L75,125 L75,155 L110,155 L110,115 L155,115 L155,140 L195,140 L195,130 L240,130 L240,160 L275,160 L275,120 L325,120 L325,145 L365,145 L365,135 L400,135 L400,200 Z" />
+    <!-- Glowing Location Pin / Verified Emblem -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M320,56 C304,56 292,68 292,84 C292,105 320,128 320,128 C320,128 348,105 348,84 C348,68 336,56 320,56 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M317,91 L309,83 L312.5,79.5 L317,84 L328.5,72.5 L332,76 Z" />
+</vector>

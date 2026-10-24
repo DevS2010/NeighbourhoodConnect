@@ -1,0 +1,6 @@
+{
+  "name": "NeighbourConnect",
+  "description": "Hyper-local marketplace connecting neighborhoods with verified local professionals across 25+ trades, featuring AI fault diagnosis, Trust Scores, emergency SOS dispatch, and 2% commission escrow payments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

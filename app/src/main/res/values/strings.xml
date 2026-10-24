@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">NeighbourConnect</string>
+    <string name="tagline">Connecting every neighborhood with trusted professionals.</string>
+    <string name="emergency_sos">Emergency SOS</string>
+    <string name="ai_diagnosis_title">AI Fault Diagnosis &amp; Cost Estimator</string>
+    <string name="trust_score_label">Verified Trust Score</string>
+    <string name="platform_commission_label">2% Flat Platform Commission</string>
+    <string name="escrow_protected_label">100% Razorpay Escrow Protected</string>
+    <string name="search_placeholder">Search 25+ professions or describe your issue...</string>
+    <string name="role_customer">Customer Mode</string>
+    <string name="role_provider">Provider Pro</string>
+</resources>

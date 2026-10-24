@@ -1,0 +1,265 @@
+{
+  "entities": {
+    "ConsumerProfile": {
+      "title": "ConsumerProfile",
+      "description": "Authenticated NeighbourConnect user profile linked to the platform owner account, tracking selected role (CONSUMER or PROVIDER).",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the signed-in user."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name from Google Sign-In."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User verified email address from Google Sign-In."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "Optional profile avatar URL from Google account."
+        },
+        "neighborhood": {
+          "type": "string",
+          "description": "Active GPS neighborhood selected by the user."
+        },
+        "linkedAccountOwnerEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Platform owner account email to which this user profile is linked."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["CONSUMER", "PROVIDER"],
+          "description": "Selected marketplace role of the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "email",
+        "neighborhood",
+        "linkedAccountOwnerEmail",
+        "role",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ServiceProviderRegistration": {
+      "title": "ServiceProviderRegistration",
+      "description": "Mandatory KYC Government ID and Professional Certification registration record for Service Providers.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the registered service provider."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified Google email of the service provider."
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Full legal or business name of the service provider."
+        },
+        "professionCategory": {
+          "type": "string",
+          "description": "Primary profession category key (e.g. ELECTRICIAN, PLUMBER, DOCTOR)."
+        },
+        "neighborhood": {
+          "type": "string",
+          "description": "Primary service neighborhood."
+        },
+        "city": {
+          "type": "string",
+          "description": "Service city."
+        },
+        "govIdType": {
+          "type": "string",
+          "enum": ["AADHAAR", "PAN", "DRIVING_LICENSE", "PASSPORT"],
+          "description": "Type of mandatory Government ID document submitted."
+        },
+        "govIdNumber": {
+          "type": "string",
+          "description": "Validated Government ID document number."
+        },
+        "govIdDocumentVerified": {
+          "type": "boolean",
+          "description": "Whether the Government ID document scan was attached and verified."
+        },
+        "certificationTitle": {
+          "type": "string",
+          "description": "Professional certification or trade license title."
+        },
+        "issuingAuthority": {
+          "type": "string",
+          "description": "Recognized board or authority that issued the certification."
+        },
+        "certificationNumber": {
+          "type": "string",
+          "description": "Alphanumeric registration or license certificate number."
+        },
+        "experienceYears": {
+          "type": "integer",
+          "description": "Verified years of professional experience."
+        },
+        "baseVisitingFeeInr": {
+          "type": "integer",
+          "description": "Standard visiting and inspection fee in INR."
+        },
+        "upiId": {
+          "type": "string",
+          "description": "Validated UPI ID for 98% escrow payouts."
+        },
+        "acceptsEmergencySos": {
+          "type": "boolean",
+          "description": "Whether the provider accepts 24x7 emergency SOS dispatches."
+        },
+        "linkedAccountOwnerEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Platform owner account email to which this provider is linked."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Registration creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Registration update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "email",
+        "fullName",
+        "professionCategory",
+        "neighborhood",
+        "city",
+        "govIdType",
+        "govIdNumber",
+        "govIdDocumentVerified",
+        "certificationTitle",
+        "issuingAuthority",
+        "certificationNumber",
+        "experienceYears",
+        "baseVisitingFeeInr",
+        "upiId",
+        "acceptsEmergencySos",
+        "linkedAccountOwnerEmail",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ConsumerBooking": {
+      "title": "ConsumerBooking",
+      "description": "Cloud-synced service booking created by an authenticated consumer and linked to the platform account.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the consumer who created the booking."
+        },
+        "consumerEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the consumer who placed the booking."
+        },
+        "linkedAccountOwnerEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Platform owner account email to which this booking is linked."
+        },
+        "providerId": {
+          "type": "string",
+          "description": "ID of the booked local professional."
+        },
+        "providerName": {
+          "type": "string",
+          "description": "Name of the booked local professional."
+        },
+        "categoryTitle": {
+          "type": "string",
+          "description": "Service trade category title."
+        },
+        "issueSummary": {
+          "type": "string",
+          "description": "Description of the consumer service issue."
+        },
+        "neighborhood": {
+          "type": "string",
+          "description": "Service address / neighborhood."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["QUOTE_SUBMITTED", "ESCROW_FUNDED", "PROVIDER_EN_ROUTE", "IN_PROGRESS", "COMPLETED"],
+          "description": "Current booking lifecycle status."
+        },
+        "totalAmountInr": {
+          "type": "integer",
+          "description": "Total payable amount in INR."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Booking creation server timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Booking update server timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "consumerEmail",
+        "linkedAccountOwnerEmail",
+        "providerId",
+        "providerName",
+        "categoryTitle",
+        "issueSummary",
+        "neighborhood",
+        "status",
+        "totalAmountInr",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/consumers/{userId}": {
+      "schema": {
+        "$ref": "#/entities/ConsumerProfile"
+      },
+      "description": "Stores authenticated user accounts and their selected role (CONSUMER or PROVIDER) linked to the NeighbourConnect owner account."
+    },
+    "/service_providers/{userId}": {
+      "schema": {
+        "$ref": "#/entities/ServiceProviderRegistration"
+      },
+      "description": "Stores mandatory Government ID KYC and Professional Certification records for registered Service Providers."
+    },
+    "/consumer_bookings/{bookingId}": {
+      "schema": {
+        "$ref": "#/entities/ConsumerBooking"
+      },
+      "description": "Stores cloud-synced consumer service bookings linked to the consumer and platform owner account."
+    }
+  }
+}

@@ -1,0 +1,315 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- PRIMITIVE HELPERS ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Bootstrapped Platform Owner / Admin check (requires verified email or explicit admin document)
+    function isPlatformOwner() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == 'Jksmau@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    // --- ENTITY VALIDATION HELPERS ---
+    function isValidConsumerProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 254 &&
+             (!('photoUrl' in data) || data.photoUrl == null || (data.photoUrl is string && data.photoUrl.size() <= 1024)) &&
+             data.neighborhood is string && data.neighborhood.size() >= 2 && data.neighborhood.size() <= 200 &&
+             data.linkedAccountOwnerEmail is string && data.linkedAccountOwnerEmail == 'Jksmau@gmail.com' &&
+             data.role is string && (data.role == 'CONSUMER' || data.role == 'PROVIDER') &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidServiceProviderRegistration(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 254 &&
+             data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 120 &&
+             data.professionCategory is string && data.professionCategory.size() >= 2 && data.professionCategory.size() <= 80 &&
+             (!('customProfessionTitle' in data) || data.customProfessionTitle == null || (data.customProfessionTitle is string && data.customProfessionTitle.size() <= 80)) &&
+             data.neighborhood is string && data.neighborhood.size() >= 2 && data.neighborhood.size() <= 200 &&
+             data.city is string && data.city.size() >= 2 && data.city.size() <= 100 &&
+             data.govIdType is string && (
+               data.govIdType == 'AADHAAR' ||
+               data.govIdType == 'PAN' ||
+               data.govIdType == 'DRIVING_LICENSE' ||
+               data.govIdType == 'PASSPORT'
+             ) &&
+             data.govIdNumber is string && data.govIdNumber.size() >= 8 && data.govIdNumber.size() <= 24 &&
+             data.govIdNumber.matches('^[A-Za-z0-9\\- ]+$') &&
+             (!('govIdDocumentUri' in data) || data.govIdDocumentUri == null || (data.govIdDocumentUri is string && data.govIdDocumentUri.size() >= 5 && data.govIdDocumentUri.size() <= 1024)) &&
+             data.govIdDocumentVerified is bool && data.govIdDocumentVerified == true &&
+             data.certificationTitle is string && data.certificationTitle.size() >= 3 && data.certificationTitle.size() <= 120 &&
+             data.issuingAuthority is string && data.issuingAuthority.size() >= 3 && data.issuingAuthority.size() <= 120 &&
+             data.certificationNumber is string && data.certificationNumber.size() >= 5 && data.certificationNumber.size() <= 30 &&
+             data.certificationNumber.matches('^[A-Za-z0-9_\\-/]+$') &&
+             (!('certificationDocumentUri' in data) || data.certificationDocumentUri == null || (data.certificationDocumentUri is string && data.certificationDocumentUri.size() <= 1024)) &&
+             data.experienceYears is int && data.experienceYears >= 0 && data.experienceYears <= 60 &&
+             data.baseVisitingFeeInr is int && data.baseVisitingFeeInr >= 49 && data.baseVisitingFeeInr <= 100000 &&
+             data.upiId is string && data.upiId.size() >= 5 && data.upiId.size() <= 120 &&
+             data.acceptsEmergencySos is bool &&
+             (!('kycStatus' in data) || data.kycStatus == 'VERIFIED' || data.kycStatus == 'PENDING') &&
+             data.linkedAccountOwnerEmail is string && data.linkedAccountOwnerEmail == 'Jksmau@gmail.com' &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidConsumerBooking(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.consumerEmail is string && data.consumerEmail.size() >= 3 && data.consumerEmail.size() <= 254 &&
+             data.linkedAccountOwnerEmail is string && data.linkedAccountOwnerEmail == 'Jksmau@gmail.com' &&
+             data.providerId is string && data.providerId.size() >= 1 && data.providerId.size() <= 128 &&
+             data.providerName is string && data.providerName.size() >= 1 && data.providerName.size() <= 120 &&
+             data.categoryTitle is string && data.categoryTitle.size() >= 1 && data.categoryTitle.size() <= 100 &&
+             data.issueSummary is string && data.issueSummary.size() >= 1 && data.issueSummary.size() <= 1000 &&
+             data.neighborhood is string && data.neighborhood.size() >= 2 && data.neighborhood.size() <= 200 &&
+             data.status is string && (
+               data.status == 'QUOTE_SUBMITTED' ||
+               data.status == 'ESCROW_FUNDED' ||
+               data.status == 'PROVIDER_EN_ROUTE' ||
+               data.status == 'IN_PROGRESS' ||
+               data.status == 'COMPLETED'
+             ) &&
+             data.totalAmountInr is int && data.totalAmountInr >= 0 && data.totalAmountInr <= 10000000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // --- ADMINS COLLECTION ---
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && (request.auth.uid == adminId || isPlatformOwner());
+      allow list, create, update, delete: if false;
+    }
+
+    // --- CONSUMERS COLLECTION (/consumers/{userId}) ---
+    match /consumers/{userId} {
+      // PII Isolation: Only the consumer themselves or the verified platform owner can read
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isPlatformOwner());
+
+      // Query Enforcer: Must filter by userId == request.auth.uid (or be verified platform owner)
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isPlatformOwner());
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId',
+                         'displayName',
+                         'email',
+                         'neighborhood',
+                         'linkedAccountOwnerEmail',
+                         'role',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId',
+                         'displayName',
+                         'email',
+                         'photoUrl',
+                         'neighborhood',
+                         'linkedAccountOwnerEmail',
+                         'role',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       isValidConsumerProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       isValidConsumerProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().linkedAccountOwnerEmail == existing().linkedAccountOwnerEmail &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName',
+                         'email',
+                         'photoUrl',
+                         'neighborhood',
+                         'role',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isPlatformOwner());
+    }
+
+    // --- SERVICE PROVIDERS KYC COLLECTION (/service_providers/{userId}) ---
+    match /service_providers/{userId} {
+      // PII & Government ID Isolation: Strictly restricted to the provider owner or verified platform owner
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isPlatformOwner());
+
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isPlatformOwner());
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId',
+                         'email',
+                         'fullName',
+                         'professionCategory',
+                         'neighborhood',
+                         'city',
+                         'govIdType',
+                         'govIdNumber',
+                         'govIdDocumentVerified',
+                         'certificationTitle',
+                         'issuingAuthority',
+                         'certificationNumber',
+                         'experienceYears',
+                         'baseVisitingFeeInr',
+                         'upiId',
+                         'acceptsEmergencySos',
+                         'linkedAccountOwnerEmail',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId',
+                         'email',
+                         'fullName',
+                         'professionCategory',
+                         'customProfessionTitle',
+                         'neighborhood',
+                         'city',
+                         'govIdType',
+                         'govIdNumber',
+                         'govIdDocumentUri',
+                         'govIdDocumentVerified',
+                         'certificationTitle',
+                         'issuingAuthority',
+                         'certificationNumber',
+                         'certificationDocumentUri',
+                         'experienceYears',
+                         'baseVisitingFeeInr',
+                         'upiId',
+                         'acceptsEmergencySos',
+                         'kycStatus',
+                         'linkedAccountOwnerEmail',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       isValidServiceProviderRegistration(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       isValidServiceProviderRegistration(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().linkedAccountOwnerEmail == existing().linkedAccountOwnerEmail &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'email',
+                         'fullName',
+                         'professionCategory',
+                         'customProfessionTitle',
+                         'neighborhood',
+                         'city',
+                         'govIdType',
+                         'govIdNumber',
+                         'govIdDocumentUri',
+                         'govIdDocumentVerified',
+                         'certificationTitle',
+                         'issuingAuthority',
+                         'certificationNumber',
+                         'certificationDocumentUri',
+                         'experienceYears',
+                         'baseVisitingFeeInr',
+                         'upiId',
+                         'acceptsEmergencySos',
+                         'kycStatus',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isPlatformOwner());
+    }
+
+    // --- CONSUMER BOOKINGS COLLECTION (/consumer_bookings/{bookingId}) ---
+    match /consumer_bookings/{bookingId} {
+      allow get: if isSignedIn() && isValidId(bookingId) && (existing().userId == request.auth.uid || isPlatformOwner());
+
+      allow list: if isSignedIn() && (existing().userId == request.auth.uid || isPlatformOwner());
+
+      allow create: if isSignedIn() &&
+                       isValidId(bookingId) &&
+                       incoming().keys().hasAll([
+                         'userId',
+                         'consumerEmail',
+                         'linkedAccountOwnerEmail',
+                         'providerId',
+                         'providerName',
+                         'categoryTitle',
+                         'issueSummary',
+                         'neighborhood',
+                         'status',
+                         'totalAmountInr',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId',
+                         'consumerEmail',
+                         'linkedAccountOwnerEmail',
+                         'providerId',
+                         'providerName',
+                         'categoryTitle',
+                         'issueSummary',
+                         'neighborhood',
+                         'status',
+                         'totalAmountInr',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       isValidConsumerBooking(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(bookingId) &&
+                       existing().userId == request.auth.uid &&
+                       existing().status != 'COMPLETED' &&
+                       isValidConsumerBooking(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().consumerEmail == existing().consumerEmail &&
+                       incoming().linkedAccountOwnerEmail == existing().linkedAccountOwnerEmail &&
+                       incoming().providerId == existing().providerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'status',
+                         'issueSummary',
+                         'neighborhood',
+                         'totalAmountInr',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(bookingId) && (existing().userId == request.auth.uid || isPlatformOwner());
+    }
+  }
+}
